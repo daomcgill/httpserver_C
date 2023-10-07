@@ -31,7 +31,7 @@ FILE *file;
  * @return: void
  *
  **/
-/* I took this entire function from https://stackoverflow.com/questions/6420194/how-to-print-both-to-stdout-and-file-in-c */
+//I took this entire function from https://stackoverflow.com/questions/6420194/how-to-print-both-to-stdout-and-file-in-c 
 void printBoth(FILE *fp, char *string) 
 {
     printf("%s", string);
@@ -82,7 +82,7 @@ int bindSocket(int sock, int ipv4, int port, int allip)
    servaddr.sin_family = ipv4;
    servaddr.sin_port = htons(port);
    servaddr.sin_addr.s_addr = allip;
-   /* the following three lines are from: https://people.cs.rutgers.edu/~pxk/rutgers/notes/sockets/ */
+   //the following three lines are from: https://people.cs.rutgers.edu/~pxk/rutgers/notes/sockets/
    if (bind(sock, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) 
    {
       printBoth(file, "ERR: socket could not be bound\n");
@@ -124,7 +124,7 @@ int acceptConnection(int sock)
 {
    int conn = 0;
    struct sockaddr_in cliaddr;
-   /* for use with ptr to socklen_t */
+   //for use with ptr to socklen_t
    socklen_t cliaddrlen = sizeof(cliaddr);
    conn = accept(sock, (struct sockaddr*)&cliaddr, &cliaddrlen);
    if (conn < 0)
@@ -145,63 +145,70 @@ int acceptConnection(int sock)
 */
 int main(int argc, char *argv[])
 {
-   int rv = 0;
-   //arg to int
-   int port = atoi(argv[1]);
-   int ipv4 = AF_INET;
-   int tcp = SOCK_STREAM;
-   int allip = INADDR_ANY;
-   int sock = 0;
+    int rv = 0;
+    //arg to int
+    int port = atoi(argv[1]);
+    int ipv4 = AF_INET;
+    int tcp = SOCK_STREAM;
+    int allip = INADDR_ANY;
+    int sock = 0;
 
-   //file to write to
-   file = fopen("output_server.txt", "w");
-   if (file == NULL)
-   {
-      printBoth(file, "ERR: could not open file\n");
-      rv = -1;
-   }
+    //file to write to
+    file = fopen("output_server.txt", "w");
+    if (file == NULL)
+    {
+        printBoth(file, "ERR: could not open file\n");
+        rv = -1;
+    }
+    else
+    {
+        sock = createSocket(ipv4, tcp);
+        if (sock < 0)
+        {
+            printBoth(file, "ERR: socket could not be created\n");
+            rv = -1;
+        }
+        else
+        {
+            printBoth(file, "socket created\n");
 
-   while (rv == 0)
-   {
-      sock = createSocket(ipv4, tcp);
-      if (sock < 0)
-      {
-         rv = -1;
-         break;
-      }
-      printBoth(file, "socket created\n");
+            if (bindSocket(sock, ipv4, port, allip) < 0)
+            {
+                printBoth(file, "ERR: socket could not be bound\n");
+                rv = -1;
+            }
+            else
+            {
+                printBoth(file, "socket bound\n");
 
-      if (bindSocket(sock, ipv4, port, allip) < 0)
-      {
-         rv = -1;
-         break;
-      }
-      printBoth(file, "socket bound\n");
+                if (startListen(sock) < 0)
+                {
+                    printBoth(file, "ERR: listen failed\n");
+                    rv = -1;
+                }
+                else
+                {
+                    printBoth(file, "listening for connections...\n");
+                    int conn = acceptConnection(sock);
+                    if (conn < 0)
+                    {
+                        printBoth(file, "ERR: connection failed\n");
+                        rv = -1;
+                    }
+                    else
+                    {
+                        printBoth(file, "connection established\n");
+                        char message[50] = "Hello Dao. The server is working!\n";
+                        send(conn, message, strlen(message), 0);
+                        printBoth(file, "message sent\n");
+                        close(conn);
+                        printBoth(file, "connection to client closed\n");
+                    }
+                }
+            }
+        }
+    }
 
-      if (startListen(sock) < 0)
-      {
-         rv = -1;
-         break;
-      }
-      printBoth(file, "listening for connections...\n");
-
-      int conn = acceptConnection(sock);
-      if (conn < 0)
-      {
-         rv = -1;
-         break;
-      }
-      printBoth(file, "connection established\n");
-
-      char message[50] = "Hello Dao. The server is working!\n";
-      send(conn, message, strlen(message), 0);
-      printBoth(file, "message sent\n");
-      close(conn);
-      printBoth(file, "connection to client closed\n");
-
-      break;
-   }
-
-   /* close file */
-   fclose(file);
+    //close file
+    fclose(file);
 }
