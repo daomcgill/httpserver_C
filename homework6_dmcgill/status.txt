@@ -1,0 +1,5 @@
+Client connects to server
+Sends file file_server.jpeg --> file_client.jpeg
+Outputs error messages to console and output_client.txt/ output_server.txt
+Compiles with make
+Connection closes after file transfer

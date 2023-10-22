@@ -1,4 +1,0 @@
-Connects to server. 
-Includes error messages. 
-Did not test errors.
-Server closes connection to client but does not stay on listening for other connections.
