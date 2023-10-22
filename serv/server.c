@@ -161,53 +161,71 @@ int main(int argc, char *argv[])
       rv = -1;
    }
 
-       sock = createSocket(ipv4, tcp);
-    if (sock >= 0 && rv == 0)
-    {
-        printBoth(file, "socket created\n");
+   sock = createSocket(ipv4, tcp);
+   if (sock >= 0 && rv == 0)
+   {
+      printBoth(file, "socket created\n");
 
-        if (bindSocket(sock, ipv4, port, allip) >= 0 && rv == 0)
-        {
-            printBoth(file, "socket bound\n");
+      if (bindSocket(sock, ipv4, port, allip) >= 0 && rv == 0)
+      {
+         printBoth(file, "socket bound\n");
 
-            if (startListen(sock) >= 0 && rv == 0)
-            {
-                printBoth(file, "listening for connections...\n");
+         if (startListen(sock) >= 0 && rv == 0)
+         {
+               printBoth(file, "listening for connections...\n");
 
-                int conn = acceptConnection(sock);
-                if (conn >= 0 && rv == 0)
-                {
-                    printBoth(file, "connection established\n");
-                    char message[50] = "Hello Dao. The server is working!\n";
-                    send(conn, message, strlen(message), 0);
-                    printBoth(file, "message sent\n");
-                    close(conn);
-                    printBoth(file, "connection to client closed\n");
-                    rv = 1;
-                }
-                else
-                {
-                    printBoth(file, "ERR: connection failed\n");
-                    rv = -1;
-                }
-            }
-            else
-            {
-                printBoth(file, "ERR: listen failed\n");
-                rv = -1;
-            }
-        }
-        else
-        {
-            printBoth(file, "ERR: socket could not be bound\n");
-            rv = -1;
-        }
-    }
-    else
-    {
-        printBoth(file, "ERR: socket could not be created\n");
-        rv = -1;
-    }
+               int conn = acceptConnection(sock);
+               if (conn >= 0 && rv == 0)
+               {
+                  printBoth(file, "connection established\n");
+                  // char message[50] = "Hello Dao. The server is working!\n";
+                  // send(conn, message, strlen(message), 0);
+                  // printBoth(file, "message sent\n");
+                  FILE *fp = fopen("file_server.jpeg", "rb");
+                  if (fp != NULL)
+                  {
+                     char buff[1000];
+                     int read = 0;
+                     printBoth(file, "sending file...\n");
+                     while ((read = fread(buff, 1, sizeof(buff), fp)) > 0)
+                     {
+                        send(conn, buff, read, 0);
+                     }
+                     printBoth(file, "file sent\n");
+                     fclose(fp);
+                     close(conn);
+                     printBoth(file, "connection to client closed\n");
+                     rv = 1;
+                  }
+                  else
+                  {
+                     printBoth(file, "ERR: could not open file\n");
+                     rv = -1;
+                  }
+               }
+               else
+               {
+                  printBoth(file, "ERR: connection failed\n");
+                  rv = -1;
+               }
+         }
+         else
+         {
+               printBoth(file, "ERR: listen failed\n");
+               rv = -1;
+         }
+      }
+      else
+      {
+         printBoth(file, "ERR: socket could not be bound\n");
+         rv = -1;
+      }
+   }
+   else
+   {
+      printBoth(file, "ERR: socket could not be created\n");
+      rv = -1;
+   }
 
    /* close file */
    fclose(file);

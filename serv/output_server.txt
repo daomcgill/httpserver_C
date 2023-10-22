@@ -2,5 +2,6 @@ socket created
 socket bound
 listening for connections...
 connection established
-message sent
+sending file...
+file sent
 connection to client closed

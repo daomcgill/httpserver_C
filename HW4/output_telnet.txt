@@ -1,8 +1,0 @@
-dao@mbPro2021-dao ~ % telnet localhost 25525
-Trying ::1...
-telnet: connect to address ::1: Connection refused
-Trying 127.0.0.1...
-Connected to localhost.
-Escape character is '^]'.
-Hello Dao. The server is working!
-Connection closed by foreign host.
